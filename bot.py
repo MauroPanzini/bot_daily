@@ -43,7 +43,7 @@ async def on_reaction_add(reaction, user):
         elif reaction.emoji == emoji_red:
             asistentes.remove(user)
             print(f'{user.name} no asistirá a la daily.')
-        await asyncio.sleep(900)  # Esperar 30 minutos
+        await asyncio.sleep(900)  # Esperar 15 minutos
         await reaction.message.clear_reactions()  # Eliminar todas las reacciones del mensaje
         asistentes.clear()
 
