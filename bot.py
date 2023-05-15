@@ -43,7 +43,7 @@ async def on_reaction_add(reaction, user):
         elif reaction.emoji == emoji_red:
             asistentes.remove(user)
             print(f'{user.name} no asistirá a la daily.')
-        await asyncio.sleep(30)  # Esperar 30 minutos
+        await asyncio.sleep(900)  # Esperar 30 minutos
         await reaction.message.clear_reactions()  # Eliminar todas las reacciones del mensaje
         asistentes.clear()
 
@@ -75,8 +75,6 @@ def member_to_dict(member):
 
 
 
-
-
 @bot.event
 async def on_ready():
     print(f'Bot conectado como {bot.user.name}')
@@ -85,7 +83,7 @@ async def on_ready():
 async def schedule_daily():
     while True:
         now = datetime.datetime.now()
-        target_time = now.replace(hour=14, minute=8, second=40, microsecond=0)
+        target_time = now.replace(hour=10, minute=0, second=0, microsecond=0)
         if now > target_time:
             target_time += datetime.timedelta(days=1)  # Ejecutar al día siguiente si ya pasó la hora objetivo hoy
         time_to_wait = (target_time - now).total_seconds()
