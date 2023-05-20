@@ -29,15 +29,22 @@ async def on_ready():
 
 @bot.command()
 async def daily(ctx):
+    global mensaje_daily
     embed = discord.Embed(title='Daily Tecnología', description='⏰ 10:15\n\n🔗 [Link de la Meet](a) \n\n🤨 ¿Quién viene?', color=0x279D2E)
     message = await ctx.send(embed=embed)
     await message.add_reaction(emoji_green)
     await message.add_reaction(emoji_red)
+    mensaje_daily = message.id
+
 
 @bot.event
 async def on_reaction_add(reaction, user):
     channel = reaction.message.channel
-    if channel.id == CHANNEL_ID and reaction.message.author == bot.user:
+    global mensaje_daily
+    await asyncio.sleep(1)
+    channel = reaction.message.channel
+    message_id = reaction.message.id
+    if channel.id == CHANNEL_ID and reaction.message.author == bot.user and message_id == mensaje_daily:
         if reaction.emoji == emoji_green and user not in asistentes:
             asistentes.append(user)
             print(f'{user.name} asistirá a la daily.')
@@ -45,7 +52,7 @@ async def on_reaction_add(reaction, user):
             asistentes.remove(user)
             print(f'{user.name} no asistirá a la daily.')
         try:
-            await asyncio.sleep(9)  # Esperar 15 minutos
+            await asyncio.sleep(900)  # Esperar 15 minutos
             await reaction.message.clear_reactions()  # Eliminar todas las reacciones del mensaje
             asistentes.clear()
             await asyncio.sleep(5)  # Esperar 5 segundos adicionales
