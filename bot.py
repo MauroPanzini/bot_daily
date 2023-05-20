@@ -106,6 +106,22 @@ async def schedule_daily():
             time_to_wait = (next_weekday - now).total_seconds()
             await asyncio.sleep(time_to_wait)
 
+@bot.command()
+async def cuando_daily(ctx):
+    now = datetime.datetime.now()
+    if es_dia_laborable(now.date()):
+        target_time = now.replace(hour=10, minute=0, second=0, microsecond=0)
+        if now > target_time:
+            target_time += datetime.timedelta(days=1)  # Ejecutar al día siguiente si ya pasó la hora objetivo hoy
+    else:
+        # Obtener el próximo día laborable
+        next_weekday = now + datetime.timedelta(days=1)
+        while not es_dia_laborable(next_weekday.date()):
+            next_weekday += datetime.timedelta(days=1)
+        target_time = next_weekday.replace(hour=10, minute=0, second=0, microsecond=0)
+
+    # Enviar un mensaje con la fecha y hora de la siguiente reunión
+    await ctx.send(f"La próxima reunión está programada para el día {target_time.strftime('%Y-%m-%d')} a las {target_time.strftime('%H:%M')} (hora de Argentina).")
 
 def run_bot():
     bot.run(TOKEN)
