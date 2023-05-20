@@ -22,6 +22,7 @@ emoji_red = '❌'
 
 asistentes = []
 
+
 @bot.event
 async def on_ready():
     print(f'Bot conectado como {bot.user.name}')
@@ -37,15 +38,20 @@ async def daily(ctx):
 async def on_reaction_add(reaction, user):
     channel = reaction.message.channel
     if channel.id == CHANNEL_ID and reaction.message.author == bot.user:
-        if reaction.emoji == emoji_green:
+        if reaction.emoji == emoji_green and user not in asistentes:
             asistentes.append(user)
             print(f'{user.name} asistirá a la daily.')
-        elif reaction.emoji == emoji_red:
+        elif reaction.emoji == emoji_red and user in asistentes:
             asistentes.remove(user)
             print(f'{user.name} no asistirá a la daily.')
-        await asyncio.sleep(900)  # Esperar 15 minutos
-        await reaction.message.clear_reactions()  # Eliminar todas las reacciones del mensaje
-        asistentes.clear()
+        try:
+            await asyncio.sleep(9)  # Esperar 15 minutos
+            await reaction.message.clear_reactions()  # Eliminar todas las reacciones del mensaje
+            asistentes.clear()
+            await asyncio.sleep(5)  # Esperar 5 segundos adicionales
+            await reaction.message.delete()  # Eliminar el mensaje
+        except:
+            print("No hay mensajes para eliminar")
 
 @bot.command()
 async def participantes(ctx):
@@ -62,6 +68,7 @@ async def daily_command():
     message = await channel.send(embed=embed)
     await message.add_reaction(emoji_green)
     await message.add_reaction(emoji_red)
+    
 
 def member_to_dict(member):
     avatar_url = member.avatar.url if member.avatar else member.default_avatar.url
