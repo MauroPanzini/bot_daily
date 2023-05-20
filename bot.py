@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 import os
 import asyncio
 import datetime
-
+import holidays
 load_dotenv()
 
 TOKEN = os.getenv('TOKEN')
@@ -74,6 +74,14 @@ def member_to_dict(member):
     return member_dict
 
 
+def es_dia_laborable(fecha):
+    # Obtener los días feriados en Argentina para el año actual
+    feriados_ar = holidays.Argentina(years=datetime.date.today().year)
+
+    # Verificar si la fecha es un día feriado o fin de semana
+    if fecha.weekday() >= 5 or fecha in feriados_ar:
+        return False
+    return True
 
 @bot.event
 async def on_ready():
@@ -83,12 +91,21 @@ async def on_ready():
 async def schedule_daily():
     while True:
         now = datetime.datetime.now()
-        target_time = now.replace(hour=10, minute=0, second=0, microsecond=0)
-        if now > target_time:
-            target_time += datetime.timedelta(days=1)  # Ejecutar al día siguiente si ya pasó la hora objetivo hoy
-        time_to_wait = (target_time - now).total_seconds()
-        await asyncio.sleep(time_to_wait)
-        await daily_command()
+        if es_dia_laborable(now.date()):
+            target_time = now.replace(hour=10, minute=0, second=0, microsecond=0)
+            if now > target_time:
+                target_time += datetime.timedelta(days=1)  # Ejecutar al día siguiente si ya pasó la hora objetivo hoy
+            time_to_wait = (target_time - now).total_seconds()
+            await asyncio.sleep(time_to_wait)
+            await daily_command()
+        else:
+            # Esperar hasta el próximo día laborable
+            next_weekday = now + datetime.timedelta(days=1)
+            while not es_dia_laborable(next_weekday.date()):
+                next_weekday += datetime.timedelta(days=1)
+            time_to_wait = (next_weekday - now).total_seconds()
+            await asyncio.sleep(time_to_wait)
+
 
 def run_bot():
     bot.run(TOKEN)
